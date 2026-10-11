@@ -4,5 +4,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Keep CI honest: warnings fail the build in Release. -->
+    <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
+    <!-- CA1707 (underscores in test names) and CA1848 (LoggerMessage delegates) are noise for a template. -->
+    <NoWarn>$(NoWarn);CA1707;CA1848;CA1515;CA2007</NoWarn>
   </PropertyGroup>
 </Project>
