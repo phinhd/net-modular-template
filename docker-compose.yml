@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: modular_template
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d modular_template"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__UsersDb: Host=postgres;Port=5432;Database=modular_template;Username=postgres;Password=postgres
+      # Local-only key. Use a secret store (user-secrets, Key Vault, CI secrets) for anything real.
+      Jwt__SigningKey: docker-compose-dev-signing-key-0123456789abcdef
+      Database__ApplyMigrationsOnStartup: "true"
+
+volumes:
+  postgres_data:

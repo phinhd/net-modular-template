@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore ModularTemplate.slnx
+
+      - name: Build (warnings as errors)
+        run: dotnet build ModularTemplate.slnx -c Release --no-restore
+
+      - name: Check formatting
+        run: dotnet format ModularTemplate.slnx --verify-no-changes --no-restore --severity warn
+
+      - name: Test (unit, architecture, integration)
+        run: >
+          dotnet test ModularTemplate.slnx -c Release --no-build
+          --logger "trx" --results-directory TestResults
+          --collect:"XPlat Code Coverage"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t modular-template-api:ci .

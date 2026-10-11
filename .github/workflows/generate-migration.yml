@@ -1,0 +1,29 @@
+name: Generate migration (temporary)
+
+on:
+  push:
+    branches: [chore/production-ready]
+
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet tool install --global dotnet-ef --version 10.0.10
+      - run: dotnet build src/Host/WebApi/WebApi.csproj
+      - name: Add InitialUsers migration
+        run: >
+          dotnet ef migrations add InitialUsers
+          -p src/Modules/Users/Users.Infrastructure
+          -s src/Host/WebApi
+          -c UsersDbContext
+          -o Persistence/Migrations
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+      - uses: actions/upload-artifact@v4
+        with:
+          name: migrations
+          path: src/Modules/Users/Users.Infrastructure/Persistence/Migrations
