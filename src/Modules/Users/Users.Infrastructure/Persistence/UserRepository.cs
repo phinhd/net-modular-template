@@ -5,19 +5,21 @@ using Users.Domain.Interfaces;
 
 namespace Users.Infrastructure.Persistence;
 
-public class UserRepository : RepositoryBase<User>, IUserRepository
+public sealed class UserRepository : RepositoryBase<User>, IUserRepository
 {
     public UserRepository(UsersDbContext context) : base(context)
     {
     }
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
-        => await DbSet.FirstOrDefaultAsync(
-            u => u.Email == email.Trim().ToLower() && !u.IsDeleted,
-            cancellationToken);
+    {
+        var normalized = User.NormalizeEmail(email);
+        return await DbSet.FirstOrDefaultAsync(u => u.Email == normalized, cancellationToken);
+    }
 
     public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
-        => await DbSet.AnyAsync(
-            u => u.Email == email.Trim().ToLower() && !u.IsDeleted,
-            cancellationToken);
+    {
+        var normalized = User.NormalizeEmail(email);
+        return await DbSet.AnyAsync(u => u.Email == normalized, cancellationToken);
+    }
 }

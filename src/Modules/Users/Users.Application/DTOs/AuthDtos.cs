@@ -1,9 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Users.Application.DTOs;
 
-public record RegisterRequest(string Email, string Password, string FullName);
+public sealed record RegisterRequest(
+    [Required, EmailAddress, MaxLength(256)] string Email,
+    [Required, MinLength(8), MaxLength(128)] string Password,
+    [Required, MaxLength(200)] string FullName);
 
-public record LoginRequest(string Email, string Password);
+public sealed record LoginRequest(
+    [Required, EmailAddress] string Email,
+    [Required] string Password);
 
-public record AuthResponse(Guid UserId, string Email, string FullName, string Role, string Token);
+public sealed record AuthResponse(Guid UserId, string Email, string FullName, string Role, string Token);
 
-public record UserDto(Guid Id, string Email, string FullName, string Role, bool IsActive);
+public sealed record UserDto(Guid Id, string Email, string FullName, string Role, bool IsActive, DateTime CreatedAtUtc);

@@ -8,8 +8,10 @@ namespace Users.Infrastructure.Persistence;
 /// If you need cross-module data, query through the other module's public
 /// Application service/API — never reach into another module's DbContext directly.
 /// </summary>
-public class UsersDbContext : DbContext
+public sealed class UsersDbContext : DbContext
 {
+    public const string Schema = "users";
+
     public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options)
     {
     }
@@ -18,7 +20,7 @@ public class UsersDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("users");
+        modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(UsersDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }

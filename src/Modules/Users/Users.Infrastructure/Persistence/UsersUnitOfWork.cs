@@ -2,7 +2,7 @@ using Users.Domain.Interfaces;
 
 namespace Users.Infrastructure.Persistence;
 
-public class UsersUnitOfWork : IUsersUnitOfWork
+public sealed class UsersUnitOfWork : IUsersUnitOfWork
 {
     private readonly UsersDbContext _context;
     private IUserRepository? _users;
